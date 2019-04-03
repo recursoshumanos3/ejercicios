@@ -1,13 +1,47 @@
-function comenzar(){
-    const entrada = document.querySelector(".begin");
-    const salida = document.querySelector(".finish");
-    const listado = ["A","C","D","M","I"];
-    salida.value ="";
-    traducir(entrada,salida,listado);
+
+function parser(e) {
+    let ganancias = [{}];
+    let N = 0;
+    e.value.split('\n').map(linea => { 
+        const lineaA = linea.split(' '); 
+        if(["D","M","A","C","I"].includes(lineaA[0])) { 
+            if(ganancias[N][lineaA[0]]===undefined) 
+                ganancias[N][lineaA[0]]=0 
+            ganancias[N][lineaA[0]] += parseFloat(lineaA[1]);
+        } else if (lineaA[0] === 'N') { 
+            N += 1 
+            ganancias[N] = {}; 
+        } 
+    });
+    return ganancias
 }
+function findMinMax(o) {
+    let min = 99999, max = 0;
+    let keyMin = undefined, keyMax = undefined
+    Object.keys(o).map(key => {
+        let v = o[key]
+
+        keyMin = (v < min) ? key : keyMin;
+        min = (v < min) ? v : min;
+
+        keyMax = (v > max) ? key : keyMax;
+        max = (v > max) ? v : max;
+    });
+    return [keyMin, keyMax];
+  }
+
+  function esMayorComida(o) {
+    if(Object.keys(o).length === 0)
+        return
+    let totalNoComida = Object.keys(o)
+        .filter(key => key !== 'A')
+        .reduce((a,b) => a+o[b])
+    return o['A'] === undefined ? false : o['A'] > totalNoComida
+  }
 
 function traducir(e,s,l){
     e = e.value.split("\n");
+
     e.pop();
     while (e.includes("N 0")) {
         procesar(e.splice(0,e.indexOf("N 0")),s,l);
@@ -45,7 +79,6 @@ function salir(n,l,s) {
 }
 
 function elegir(l){
-    console.log(l);
     switch (l) {
         case "A":
             l = "Comidas#";
@@ -72,4 +105,19 @@ function elegir(l){
             break;
     }
     return l;
+}
+
+
+function comenzar(){
+    const entrada = document.querySelector(".begin");
+    const salida = document.querySelector(".finish");
+    const listado = ["A","C","D","M","I"];
+    salida.value ="";
+    //traducir(entrada,salida,listado); // parser
+    let ganancias = parser(entrada)
+    let myms = ganancias.map(dia => findMinMax(dia));
+    console.log(myms);
+    let esMayorComidas = ganancias.map(dia => esMayorComida(dia));
+    console.log(esMayorComidas);
+
 }
